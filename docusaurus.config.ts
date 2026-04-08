@@ -71,7 +71,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/sujal-maheshwari2004/toolstorepy',
+          href: 'https://github.com/sujal-maheshwari2004/ToolStore',
           label: 'GitHub',
           position: 'right',
         },
@@ -127,7 +127,7 @@ const config: Config = {
             },
             {
               label: 'GitHub',
-              href: 'https://github.com/sujal-maheshwari2004/toolstorepy',
+              href: 'https://github.com/sujal-maheshwari2004/ToolStore',
             },
           ],
         },
