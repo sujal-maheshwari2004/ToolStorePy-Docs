@@ -82,5 +82,5 @@ npm run typecheck
 Main ToolStorePy repository:
 
 ```text
-https://github.com/sujal-maheshwari2004/toolstorepy
+https://github.com/sujal-maheshwari2004/ToolStore
 ```
