@@ -1,0 +1,42 @@
+---
+title: Queries.json
+description: Understand the query input format used by the ToolStorePy build pipeline.
+---
+
+# Queries.json
+
+`queries.json` is the primary build input for ToolStorePy. Each item describes a capability you want the system to satisfy.
+
+## Required shape
+
+```json
+[
+  { "tool_description": "monitor CPU memory and disk usage and list top processes" },
+  { "tool_description": "read metadata and EXIF data from a local image file" }
+]
+```
+
+## Required field
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `tool_description` | Yes | Natural-language description used for semantic retrieval |
+
+## How ToolStorePy uses it
+
+1. Load each `tool_description`.
+2. Embed it with the configured sentence-transformer model.
+3. Retrieve top-k tool records from the ChromaDB index.
+4. Rerank those candidates with the cross-encoder.
+5. Select the best-matching repository for cloning.
+
+## Writing better queries
+
+- Describe the capability, not the implementation.
+- Include domain keywords like `hash`, `weather`, `PDF`, or `docker`.
+- Mention constraints when they matter, such as `securely`, `local file`, or `read-only`.
+- Avoid overly short prompts like `tool for text`.
+
+## Important distinction
+
+The build pipeline reads `tool_description`. Some evaluation and cache-related datasets in the source tree use fields like `query` or `git_link`, but the normal `build --queries` flow expects `tool_description`.

@@ -1,0 +1,30 @@
+---
+title: MCP Synthesizer
+description: The final synthesis stage writes a runnable MCP server with imports, utilities, tool functions, and build notes.
+---
+
+# MCP Synthesizer
+
+The MCP synthesizer is the last stage in the pipeline. It turns parser output plus build metadata into a developer-auditable Python server file.
+
+## Sections in the generated file
+
+- environment-variable comment block
+- skipped-repository comment block
+- build-notes comment block
+- MCP header
+- imports
+- utilities
+- tool functions
+- runtime footer
+
+## Why the comment blocks matter
+
+The generated file is not just an opaque artifact. It includes the decisions made during build time so developers can inspect:
+
+- which repos were skipped for security reasons
+- which names were renamed
+- which relative imports were dropped
+- which env keys are required
+
+That transparency is especially important when the build is driven by semantic retrieval instead of hand-picked source code.

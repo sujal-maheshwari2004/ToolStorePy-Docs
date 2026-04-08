@@ -1,0 +1,64 @@
+---
+title: ToolStorePy
+sidebar_position: 1
+description: ToolStorePy turns plain-English tool requests into a unified MCP server and supports custom semantic tool indexes.
+---
+
+# ToolStorePy
+
+ToolStorePy is an automatic **MCP server builder** with a built-in **semantic tool retrieval pipeline**.
+
+You give it a `queries.json` file describing the tools you want. ToolStorePy resolves a tool index, runs semantic retrieval plus reranking, clones the matched repositories, scans them for security issues, merges any required secret templates, and writes a single runnable MCP server.
+
+It also supports a second core workflow: **index authoring**. Tool catalogs can be expressed in a standard JSON manifest, embedded into ChromaDB, packaged, and later reused by other ToolStorePy builds.
+
+## What ToolStorePy does
+
+- Builds MCP servers from natural-language tool requests.
+- Retrieves tools semantically instead of relying on hardcoded mappings.
+- Lets maintainers author and publish reusable tool indexes.
+- Adds security and secret-handling checks before runtime.
+
+## The two workflows
+
+### 1. Build workflow
+
+```text
+queries.json
+      |
+      v
+download or resolve tool index
+      |
+      v
+semantic search + reranking
+      |
+      v
+clone repos + security scan + env merge
+      |
+      v
+generate mcp_unified_server.py
+```
+
+### 2. Index authoring workflow
+
+```text
+tools.json
+      |
+      v
+chunk tool metadata
+      |
+      v
+SentenceTransformer embeddings
+      |
+      v
+ChromaDB persistent index
+      |
+      v
+publish archive for ToolStorePy builds
+```
+
+## Where to go next
+
+- Start with [Installation](./installation).
+- Run a first build in [Quickstart](./quickstart).
+- Learn the index authoring workflow in [Creating Custom Tool Indexes](./creating-custom-tool-indexes).

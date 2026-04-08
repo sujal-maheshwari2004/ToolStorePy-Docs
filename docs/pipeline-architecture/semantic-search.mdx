@@ -1,0 +1,28 @@
+---
+title: Semantic Search
+description: Semantic retrieval embeds each query and looks up the closest tool records in ChromaDB.
+---
+
+# Semantic Search
+
+Semantic retrieval is the first selection stage in the build pipeline.
+
+## Flow
+
+1. Encode each query with `SentenceTransformer`.
+2. Query the `tools` collection in ChromaDB.
+3. Return the top-k metadata chunks.
+
+## Current default embedding model
+
+```text
+all-MiniLM-L6-v2
+```
+
+## Retrieval target
+
+The system searches over tool metadata chunks, not over full repository source trees. That keeps the index compact and puts quality pressure on the `tool_description` field.
+
+## Output
+
+Semantic search returns candidate documents that are later reranked before the final tool match is chosen.

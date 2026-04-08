@@ -1,0 +1,19 @@
+<svg width="332" height="76" viewBox="0 0 332 76" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">ToolStorePy</title>
+  <defs>
+    <linearGradient id="markLight" x1="10" y1="8" x2="64" y2="66" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <rect x="8" y="10" width="56" height="56" rx="18" fill="url(#markLight)"/>
+  <rect x="18" y="22" width="36" height="8" rx="4" fill="#F8FAFC"/>
+  <rect x="32" y="30" width="8" height="18" rx="4" fill="#F8FAFC"/>
+  <path d="M18 50h21c7.5 0 13 4.2 13 10s-5.5 10-13 10H18z" fill="#F59E0B"/>
+  <circle cx="47" cy="49" r="9" fill="#F8FAFC"/>
+  <path d="M46 43h2v12h-2zm-5 5h12v2H41z" fill="#0F766E"/>
+  <g>
+    <text x="82" y="34" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="28" font-weight="800" fill="#0F172A" letter-spacing=".4">ToolStorePy</text>
+    <text x="82" y="55" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="11.5" font-weight="700" fill="#475569" letter-spacing="1.8">SEMANTIC MCP TOOL BUILDING</text>
+  </g>
+</svg>

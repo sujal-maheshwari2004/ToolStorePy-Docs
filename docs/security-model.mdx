@@ -1,0 +1,43 @@
+---
+title: Security Model
+description: Understand ToolStorePy's trust boundaries across indexes, repositories, secrets, and generated runtime code.
+---
+
+# Security Model
+
+ToolStorePy helps you assemble tool servers from external code. That makes trust boundaries explicit and important.
+
+## Index trust boundary
+
+Indexes do not execute code directly, but they **do** point ToolStorePy toward external repositories. A malicious or low-quality index can steer the build toward risky sources, so index provenance still matters.
+
+## Repository trust boundary
+
+Matched repositories are cloned before build. They are then scanned with a static AST-based security scanner that reports:
+
+- shell execution
+- dynamic code execution
+- network access
+- unsafe deserialization
+- file-system access
+- environment-variable access
+
+## User approval boundary
+
+If a repository has `HIGH` findings, ToolStorePy asks you whether to include it. Skipping the repo keeps it out of the final generated MCP server.
+
+## Secret boundary
+
+If tool repos ship `.env.example` files, ToolStorePy merges them into one workspace template and checks your `.env` for missing keys. This makes runtime secret requirements visible before launch.
+
+## Runtime boundary
+
+The generated MCP server is regular Python code assembled from other repositories. ToolStorePy improves visibility and reviewability, but it is not a runtime sandbox.
+
+## Practical guidance
+
+- treat indexes as supply-chain inputs
+- review `security_report.txt`
+- prefer curated indexes and known repo sources
+- inspect generated server code before production use
+- avoid running high-risk tools blindly on sensitive machines

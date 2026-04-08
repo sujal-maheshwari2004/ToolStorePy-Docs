@@ -1,0 +1,32 @@
+---
+title: Extending ToolStorePy
+description: Where to modify ToolStorePy when you want new indexes, models, scanner rules, parser behavior, or output formats.
+---
+
+# Extending ToolStorePy
+
+ToolStorePy is deliberately modular. Most extension work maps cleanly onto one file or subsystem.
+
+## Common extension points
+
+| What you want to change | Where to look |
+| --- | --- |
+| Add a built-in index | `index/registry.py` |
+| Change embedding or reranking models | `orchestrator.py` constructor |
+| Change index download logic | `index/downloader.py` |
+| Adjust repo caching behavior | `loader/cache.py` |
+| Add or tighten security rules | `utils/security_scanner.py` |
+| Change env merge behavior | `utils/env_merger.py` |
+| Change decorator detection | `builder/parser.py` |
+| Change generated server structure | `builder/mcp_builder.py` |
+
+## Good extension patterns
+
+- keep retrieval changes separate from build synthesis changes
+- preserve auditability in generated outputs
+- add evaluation coverage when you change parser or build behavior
+- treat security rules as user-facing policy, not only internal code
+
+## Related contributor workflow
+
+If you are extending the ecosystem rather than the core codebase, see [Publishing a Tool Index](./publishing-a-tool-index).

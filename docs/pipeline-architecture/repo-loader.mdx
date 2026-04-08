@@ -1,0 +1,37 @@
+---
+title: Repo Loader
+description: Repository loading downloads indexes, warms the cache, clones repos, and optionally installs requirements.
+---
+
+# Repo Loader
+
+The repo-loading stage turns selected tool records into local source trees inside the workspace.
+
+## What happens
+
+1. Resolve unique repository URLs from the matched tool records.
+2. Warm the local bare-repo cache for missing repositories.
+3. Clone each repo into `workspace/tools/`.
+4. Optionally install `requirements.txt` into the workspace venv.
+
+## Why the cache comes first
+
+The evaluation suite relies on a warmed cache so worker processes do not repeatedly hit the network. This keeps large build experiments both faster and more stable.
+
+## Workspace layout
+
+```text
+toolstorepy_workspace/
+├── tools/
+├── index_db/
+├── .venv/
+└── mcp_unified_server.py
+```
+
+## Index download step
+
+Before any repositories are cloned, ToolStorePy downloads or reuses an index archive and extracts it under:
+
+```text
+workspace/index_db/
+```

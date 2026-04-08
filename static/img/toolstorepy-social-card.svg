@@ -1,0 +1,28 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="cardTitle">
+  <title id="cardTitle">ToolStorePy social card</title>
+  <defs>
+    <linearGradient id="bgGrad" x1="120" y1="72" x2="1080" y2="558" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#08121B"/>
+      <stop offset=".55" stop-color="#0F172A"/>
+      <stop offset="1" stop-color="#123645"/>
+    </linearGradient>
+    <linearGradient id="markGrad" x1="96" y1="96" x2="286" y2="286" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#34D399"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" rx="36" fill="url(#bgGrad)"/>
+  <circle cx="1020" cy="110" r="150" fill="#14B8A6" opacity=".12"/>
+  <circle cx="160" cy="520" r="180" fill="#F59E0B" opacity=".12"/>
+  <rect x="76" y="74" width="196" height="196" rx="54" fill="url(#markGrad)"/>
+  <path d="M124 128h98v22h-38v64h-22v-64h-38z" fill="#F8FAFC"/>
+  <path d="M120 232h46c22 0 38 10 38 26s-16 26-38 26h-46z" fill="#FBBF24"/>
+  <circle cx="222" cy="232" r="30" fill="#F8FAFC"/>
+  <path d="M218 214h8v36h-8zm-14 14h36v8h-36z" fill="#0F766E"/>
+  <text x="324" y="180" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="74" font-weight="700" fill="#F8FAFC">ToolStorePy</text>
+  <text x="324" y="248" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="30" font-weight="600" letter-spacing="1.2" fill="#8FE9D6">Automatic MCP server builder and semantic tool index engine</text>
+  <text x="88" y="402" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="30" fill="#D9E6EF">Describe tools in plain English. Match curated repos. Audit risk.</text>
+  <text x="88" y="448" font-family="'Trebuchet MS', 'Segoe UI', sans-serif" font-size="30" fill="#D9E6EF">Generate one MCP server. Publish reusable indexes.</text>
+  <rect x="88" y="500" width="588" height="62" rx="20" fill="rgba(15,118,110,.18)" stroke="rgba(143,233,214,.22)"/>
+  <text x="122" y="540" font-family="'Courier New', monospace" font-size="28" fill="#F8FAFC">pip install toolstorepy</text>
+</svg>

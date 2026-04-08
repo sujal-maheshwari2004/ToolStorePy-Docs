@@ -1,0 +1,128 @@
+---
+title: Creating Custom Tool Indexes
+description: Build your own ToolStorePy index from JSON metadata, chunking, embeddings, and ChromaDB storage.
+---
+
+# Creating Custom Tool Indexes
+
+Custom index creation is a core ToolStorePy workflow.
+
+The packaged CLI consumes indexes through `--index` or `--index-url`, but those indexes should ideally be authored from a standard JSON manifest and then passed through the embedding pipeline.
+
+## Overview
+
+```text
+tools.json
+  |
+  v
+chunking
+  |
+  v
+SentenceTransformer embeddings
+  |
+  v
+ChromaDB storage
+  |
+  v
+semantic retrieval during build()
+```
+
+## 1. Author `tools.json`
+
+Start with a JSON array of tool records:
+
+```json
+[
+  {
+    "tool_id": "1",
+    "tool_name": "calculator",
+    "tool_description": "Securely evaluate arithmetic expressions.",
+    "tool_git_link": "https://github.com/example/calculator.git"
+  }
+]
+```
+
+Each record should include:
+
+| Field | Meaning |
+| --- | --- |
+| `tool_id` | unique identifier |
+| `tool_name` | retrieval label |
+| `tool_description` | embedding content |
+| `tool_git_link` | clone source |
+
+## 2. Generate metadata interactively if you want
+
+The current reference repository includes:
+
+```bash
+python vector_db_creation/toon_file_creation.py
+```
+
+This script prompts for tool metadata and writes a legacy `.toon` file. If you are designing the workflow forward, prefer emitting JSON instead.
+
+## 3. Embed the index
+
+Run:
+
+```bash
+python vector_db_creation/embed_toon.py
+```
+
+That script currently:
+
+- parses legacy tool metadata
+- builds chunked metadata strings
+- embeds them locally with `SentenceTransformer`
+- writes them into `toon_chroma_db/`
+
+## 4. Understand the chunk format
+
+Each tool becomes a metadata chunk like:
+
+```text
+ID: 8
+Name: Random
+Description: This tool is designed to generate various types of random data, useful for testing or security.
+Git Link: https://github.com/rahulsingh0327/random_tool.git
+```
+
+Semantic search operates over this chunk text, not over raw repository code.
+
+## 5. Package and publish the index
+
+ToolStorePy's build flow expects a downloadable extracted database, so the usual next step is:
+
+1. archive the generated ChromaDB directory
+2. host it somewhere reachable by URL
+3. pass that URL to `toolstorepy build --index-url ...`
+
+## 6. Use the custom index in a build
+
+```bash
+toolstorepy build --queries queries.json --index-url https://example.com/my-index.zip
+```
+
+## Format guidance
+
+Prefer JSON for index source data because it is easier to:
+
+- validate
+- diff and review
+- generate from other systems
+- expose through APIs
+- evolve without custom parsing rules
+
+## Metadata quality guidance
+
+Retrieval accuracy depends strongly on the quality of `tool_description`.
+
+- describe capabilities clearly
+- include key nouns and verbs
+- mention read-only vs write behavior when relevant
+- avoid vague descriptions like `helper tool`
+- include domain terms users are likely to query for
+
+## Current implementation note
+
+Today, index authoring is a first-class capability, but the source repository still exposes it through legacy script names and archive distribution rather than a dedicated `toolstorepy index build` CLI command. The docs now describe the workflow in a format-agnostic, JSON-first way because that is the better public contract.

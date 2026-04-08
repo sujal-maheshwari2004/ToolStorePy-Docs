@@ -1,0 +1,64 @@
+---
+title: Vector DB Creation
+description: How ToolStorePy turns structured tool metadata into a persistent ChromaDB index.
+---
+
+# Vector DB Creation
+
+The index-authoring pipeline builds a persistent ChromaDB database from structured tool metadata. JSON is the preferred source format.
+
+## The pipeline
+
+```text
+tools.json
+  |
+  v
+load structured metadata
+  |
+  v
+chunk_tools()
+  |
+  v
+embed_chunks_local()
+  |
+  v
+store_in_chroma()
+  |
+  v
+toon_chroma_db/
+```
+
+## Main script
+
+```bash
+python vector_db_creation/embed_toon.py
+```
+
+This pipeline:
+
+1. loads structured tool metadata
+2. converts each tool into a chunked metadata document
+3. creates embeddings with `SentenceTransformer`
+4. writes them into a persistent ChromaDB collection named `tools`
+
+## Storage output
+
+The generated database is stored at:
+
+```text
+toon_chroma_db/
+```
+
+Later, the retrieval pipeline opens it through:
+
+```python
+PersistentClient(path=persist_directory)
+```
+
+## Current reference implementation
+
+The source project still includes `embed_toon.py` and related helpers. Those names reflect the current reference implementation, not the ideal public-facing format choice.
+
+## Why this is a core concept
+
+ToolStorePy's build flow only makes sense because a semantic index already exists. The vector database is not an optional optimization layer. It is the retrieval substrate that allows plain-English tool requests to map to repositories.

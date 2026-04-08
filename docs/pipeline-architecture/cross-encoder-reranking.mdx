@@ -1,0 +1,34 @@
+---
+title: Cross-Encoder Reranking
+description: Reranking refines semantic-search candidates before ToolStorePy chooses a repository.
+---
+
+# Cross-Encoder Reranking
+
+After semantic retrieval, ToolStorePy reranks the candidate documents with a cross-encoder.
+
+## Why reranking exists
+
+Embedding retrieval is fast and good at coarse recall, but it can produce plausible near-matches. The cross-encoder adds a slower, more precise relevance pass over the top-k candidate set.
+
+## Current default model
+
+```text
+cross-encoder/ms-marco-MiniLM-L-6-v2
+```
+
+## Decision rule
+
+- build `[query, document]` pairs
+- predict a score for each pair
+- keep the highest-scoring document as the match
+
+## Result format
+
+The selected document is parsed back into:
+
+- `tool_id`
+- `tool_name`
+- `tool_description`
+- `tool_git_link`
+- `score`

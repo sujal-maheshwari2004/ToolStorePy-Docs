@@ -1,0 +1,59 @@
+---
+title: Pipeline Overview
+description: End-to-end architecture for ToolStorePy builds and custom index authoring.
+---
+
+# Pipeline Overview
+
+ToolStorePy has an author-time pipeline and a build-time pipeline.
+
+## End-to-end architecture
+
+```text
+tools.json
+  |
+  v
+embedding pipeline
+  |
+  v
+ChromaDB index
+  |
+  v
+queries.json
+  |
+  v
+semantic retrieval
+  |
+  v
+cross-encoder reranking
+  |
+  v
+repo cloning
+  |
+  v
+security scan + env merge
+  |
+  v
+AST parsing
+  |
+  v
+MCP synthesis
+```
+
+## Author-time stages
+
+- define tools in a structured manifest, preferably JSON
+- chunk metadata records
+- embed them locally
+- persist the collection for later distribution
+
+## Build-time stages
+
+- resolve an index by name or URL
+- retrieve best-matching tools for each query
+- clone and inspect repos
+- build one MCP server from approved tool code
+
+## Design principle
+
+Index authoring is part of the product surface, not just a maintenance task. Without the index pipeline there is no semantic discovery layer, and without semantic discovery the build pipeline falls back to manual curation.

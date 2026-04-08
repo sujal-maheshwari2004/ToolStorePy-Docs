@@ -1,0 +1,35 @@
+---
+title: AST Parser
+description: The parser extracts imports, helpers, and @tool functions while resolving collisions across repositories.
+---
+
+# AST Parser
+
+The parser is the bridge between cloned source repositories and the final MCP builder.
+
+## What it extracts
+
+- safe imports
+- utility functions
+- classes
+- global assignments
+- `@tool`-decorated functions
+
+## What it avoids
+
+- test and docs directories
+- `setup.py` and `conftest.py`
+- `if __name__ == "__main__"` blocks
+- relative imports that cannot be resolved cleanly outside the original repo structure
+
+## Collision handling
+
+When names collide across repos, the parser renames them and records the rewrite:
+
+- duplicate tools become `<tool_name>__<repo_name>` in the generated output
+- helper functions follow the same pattern
+- globals are similarly namespaced
+
+## Why this matters
+
+ToolStorePy is assembling code from multiple independent repositories. The parser has to normalize those fragments into one namespace without silently discarding important context.

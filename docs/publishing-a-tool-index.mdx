@@ -1,0 +1,36 @@
+---
+title: Publishing a Tool Index
+description: Share reusable ToolStorePy indexes by packaging a ChromaDB archive built from structured tool metadata.
+---
+
+# Publishing a Tool Index
+
+Publishing an index is the contributor workflow that turns local index authoring into something other ToolStorePy users can consume.
+
+## Workflow
+
+1. Author a JSON tool manifest.
+2. Build the ChromaDB index with `embed_toon.py`.
+3. Package the generated database directory as an archive such as `.zip`.
+4. Host that archive at a stable URL.
+5. Share the URL or register it as a built-in index.
+
+## What consumers do with it
+
+Consumers can then run:
+
+```bash
+toolstorepy build --queries queries.json --index-url https://example.com/my-index.zip
+```
+
+## Publishing guidance
+
+- version your archives
+- keep metadata quality high
+- document the curation policy for included repos
+- state whether the index is general-purpose or domain-specific
+- prefer stable hosting so URLs do not break build automation
+
+## Why this matters
+
+Community-published indexes turn ToolStorePy from a single curated tool catalog into a reusable discovery ecosystem.

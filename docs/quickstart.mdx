@@ -1,0 +1,79 @@
+---
+title: Quickstart
+sidebar_position: 3
+description: Build your first unified MCP server from natural-language tool requests.
+---
+
+# Quickstart
+
+## 1. Create `queries.json`
+
+ToolStorePy expects an array of objects with a `tool_description` field:
+
+```json
+[
+  { "tool_description": "evaluate a mathematical arithmetic expression securely" },
+  { "tool_description": "convert between different units of measurement" },
+  { "tool_description": "calculate cryptographic hash of a file" }
+]
+```
+
+## 2. Run a build
+
+Using a built-in named index:
+
+```bash
+toolstorepy build --queries queries.json --index core-tools
+```
+
+Using a direct downloadable index:
+
+```bash
+toolstorepy build --queries queries.json --index-url https://example.com/core-tools-v1.zip
+```
+
+## 3. Review build-time prompts
+
+During the build ToolStorePy may:
+
+- print a security report for cloned repositories
+- ask whether to include repos with `HIGH` findings
+- merge `.env.example` files into `workspace/.env.example`
+- warn about missing keys in `workspace/.env`
+
+## 4. Run the generated server
+
+The build writes:
+
+```text
+toolstorepy_workspace/
+|-- mcp_unified_server.py
+|-- security_report.txt
+|-- .env.example
+`-- .venv/
+```
+
+Then run:
+
+```bash
+cd toolstorepy_workspace
+python mcp_unified_server.py
+```
+
+## 5. Use it from Python code
+
+If you want to call the build pipeline from your own application instead of the CLI:
+
+```python
+from toolstorepy.orchestrator import ToolStorePy
+
+toolstore = ToolStorePy(workspace="toolstorepy_workspace")
+toolstore.build(
+    queries="queries.json",
+    index="core-tools",
+)
+```
+
+## 6. Bring your own index later
+
+The quickstart uses a prebuilt index, but ToolStorePy is not limited to that model. You can author your own semantic tool index from JSON metadata and publish it for later builds. See [Creating Custom Tool Indexes](./creating-custom-tool-indexes).

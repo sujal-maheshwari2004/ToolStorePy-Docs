@@ -1,0 +1,57 @@
+---
+title: Evaluation Results
+description: Retrieval and build evaluation results for ToolStorePy, plus guidance on index sensitivity and metadata quality.
+---
+
+# Evaluation Results
+
+ToolStorePy ships with evaluation scripts for both retrieval quality and build robustness.
+
+## Retrieval evaluation
+
+`testing/eval_RAG_Rerank.py` benchmarks five query variants:
+
+- `original`
+- `remove_token`
+- `add_token`
+- `add_char`
+- `synonym`
+
+This helps measure how stable retrieval stays when user phrasing changes.
+
+## Build evaluation
+
+`testing/eval_build.py` stress-tests the full build pipeline across many subsets of tools and reports:
+
+- build success rate
+- AST validity
+- tool count per build
+- build timing by subset size
+
+## Current reported build summary
+
+From the provided `testing/eval_set/build_eval/summary.txt`:
+
+- total subsets: `32767`
+- build success: `32767`
+- build accuracy: `100.0%`
+- AST valid: `32767`
+- AST accuracy: `100.0%`
+- end-to-end accuracy: `100.0%`
+- average build time: `4.725372s`
+
+These numbers are strong, but they should be read as **evaluation-set results**, not a blanket guarantee for arbitrary external repositories.
+
+## Index sensitivity analysis
+
+Retrieval quality depends on metadata quality.
+
+### Best practices
+
+- write descriptive tool summaries
+- include capability keywords users will likely search for
+- distinguish similar tools with concrete behaviors
+- mention inputs, outputs, and important constraints
+- avoid overly short descriptions
+
+Poor metadata can weaken retrieval even if the underlying repository is excellent.

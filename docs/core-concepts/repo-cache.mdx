@@ -1,0 +1,43 @@
+---
+title: Repo Cache
+description: Repo caching speeds up repeated builds by reusing bare Git repositories.
+---
+
+# Repo Cache
+
+ToolStorePy uses a local bare-repository cache so repeated builds do not have to re-clone the same repos from the network every time.
+
+## How it works
+
+1. Cache a remote repository as a bare repo.
+2. Reuse that bare repo for future local clones into the workspace.
+3. Fall back to remote cloning only when the cache does not contain the target repo.
+
+## Current implementation
+
+The cache lives under the package directory by default:
+
+```text
+.repo_cache/
+```
+
+Each cached repo is stored as:
+
+```text
+<repo-name>.git
+```
+
+## Why it matters
+
+- repeated builds become much faster
+- evaluation runs can avoid hitting the network in each worker
+- the build pipeline is more reproducible once the cache is warm
+
+## Related CLI
+
+```bash
+toolstorepy cache list
+toolstorepy cache clear
+```
+
+See [CLI Reference](../cli-reference) for details.

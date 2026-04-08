@@ -1,0 +1,77 @@
+---
+title: Installation
+sidebar_position: 2
+description: Install ToolStorePy and prepare the environment for builds and MCP runtime generation.
+---
+
+# Installation
+
+## Requirements
+
+- Python `>= 3.12` for the packaged ToolStorePy CLI.
+- Git available on `PATH`.
+- Internet access for index downloads and repository cloning.
+
+## Install the package
+
+```bash
+pip install toolstorepy
+```
+
+If you are working on the repository itself, use editable install instead:
+
+```bash
+pip install -e .
+```
+
+## What happens during the first build
+
+ToolStorePy does **not** expect you to install `mcp` globally. During the first build it creates a workspace virtual environment at:
+
+```text
+toolstorepy_workspace/.venv
+```
+
+It then installs the MCP runtime there so the generated server can be run in isolation from your system Python environment.
+
+## Sanity check
+
+Once installed, the main CLI entrypoint is:
+
+```bash
+toolstorepy --help
+```
+
+## Use it as a library
+
+ToolStorePy can also be instantiated from Python code:
+
+```python
+from toolstorepy.orchestrator import ToolStorePy
+
+toolstore = ToolStorePy(
+    workspace="toolstorepy_workspace",
+    install_requirements=True,
+    verbose=True,
+)
+
+output_path = toolstore.build(
+    queries="queries.json",
+    index="core-tools",
+)
+
+print(output_path)
+```
+
+This is the right path if you want to integrate ToolStorePy into your own scripts, notebooks, or internal automation.
+
+## About index authoring tools
+
+The packaged CLI consumes indexes through `--index` or `--index-url`. If you are **authoring** your own index, prefer a JSON manifest as the source format. The current reference repository still includes legacy script names such as:
+
+```bash
+python vector_db_creation/toon_file_creation.py
+python vector_db_creation/embed_toon.py
+```
+
+That workflow is documented in [Creating Custom Tool Indexes](./creating-custom-tool-indexes).

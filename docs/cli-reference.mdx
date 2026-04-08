@@ -1,0 +1,70 @@
+---
+title: CLI Reference
+description: Commands, flags, and supporting scripts for ToolStorePy builds, cache management, and index authoring.
+---
+
+# CLI Reference
+
+## `toolstorepy build`
+
+```bash
+toolstorepy build --queries <path> [--index <name> | --index-url <url>] [options]
+```
+
+### Flags
+
+| Flag | Description |
+| --- | --- |
+| `--queries` | Path to `queries.json` with `tool_description` entries |
+| `--index` | Name of a built-in index such as `core-tools` |
+| `--index-url` | URL to a downloadable index archive |
+| `--workspace` | Output workspace directory |
+| `--install-requirements` | Install cloned repo requirements into the workspace venv |
+| `--force-refresh` | Re-download the index archive even if cached |
+| `--verbose` | Enable verbose logging |
+
+## `toolstorepy cache`
+
+### Populate
+
+```bash
+toolstorepy cache populate --queries <path> [--force]
+```
+
+### List
+
+```bash
+toolstorepy cache list
+```
+
+### Clear
+
+```bash
+toolstorepy cache clear
+```
+
+## Cache command caveat
+
+In the current implementation, `cache populate` expects query items that already include `git_link` fields. That differs from the normal build input format, which uses `tool_description`. In practice this makes `cache populate` most useful for evaluation datasets or pre-resolved manifests.
+
+## Index authoring scripts
+
+These are part of the current reference index-authoring workflow. The docs recommend JSON as the preferred source format even though the script names still reference `toon`.
+
+### Create tool metadata interactively
+
+```bash
+python vector_db_creation/toon_file_creation.py
+```
+
+### Build the vector database
+
+```bash
+python vector_db_creation/embed_toon.py
+```
+
+## Typical build command
+
+```bash
+toolstorepy build --queries queries.json --index core-tools --install-requirements
+```

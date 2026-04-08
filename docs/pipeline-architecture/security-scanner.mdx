@@ -1,0 +1,27 @@
+---
+title: Security Scanner
+description: Static AST scanning identifies shell, network, deserialization, file-system, and secret-related risks before build approval.
+---
+
+# Security Scanner
+
+Every cloned repository is scanned before the generated MCP server is built.
+
+## Severity levels
+
+| Severity | Examples |
+| --- | --- |
+| `HIGH` | shell execution, dynamic code execution, outbound network access, unsafe deserialization |
+| `MEDIUM` | file-system access, environment variable access, reflection, insecure XML parsing |
+| `LOW` | direct crypto primitives, deprecated modules, potential secret logging |
+
+## Current behavior
+
+- generate a terminal report
+- write `workspace/security_report.txt`
+- prompt the user repo-by-repo for any repository with `HIGH` findings
+- exclude skipped repos from the final generated server
+
+## Important limitation
+
+The scanner is static and AST-based. It improves reviewability, but it is not a sandbox and it does not prove that a repository is safe.

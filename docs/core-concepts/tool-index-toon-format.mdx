@@ -1,0 +1,67 @@
+---
+title: Tool Index Format
+description: ToolStorePy indexes should be treated as format-agnostic, with JSON as the preferred source format.
+---
+
+# Tool Index Format
+
+ToolStorePy tool indexes should be treated as **format-agnostic**. For documentation and ecosystem use, JSON is the preferred source format because it is easier to validate, transform, publish, and integrate with other systems.
+
+The underlying retrieval requirement is simple: each tool record needs structured metadata that can later be chunked and embedded.
+
+## Preferred JSON shape
+
+```json
+[
+  {
+    "tool_id": "1",
+    "tool_name": "calculator",
+    "tool_description": "Securely evaluate arithmetic expressions.",
+    "tool_git_link": "https://github.com/example/calculator.git"
+  }
+]
+```
+
+## Core fields
+
+| Field | Meaning |
+| --- | --- |
+| `tool_id` | Unique identifier for the tool entry |
+| `tool_name` | Human-readable label used in output and search results |
+| `tool_description` | Retrieval text that should describe the capability well |
+| `tool_git_link` | Repository URL that will later be cloned by the build pipeline |
+
+## Example entry
+
+```json
+{
+  "tool_id": "1",
+  "tool_name": "calculator",
+  "tool_description": "This is a secure mathematical calculator designed to evaluate a text-based arithmetic expression.",
+  "tool_git_link": "https://github.com/example/calculator.git"
+}
+```
+
+## Why JSON is preferred
+
+- it is already a standard interchange format
+- it is easier to validate with schemas
+- it avoids custom escaping rules
+- it is simpler for contributors and downstream tooling
+
+## Metadata chunking
+
+ToolStorePy does **not** embed raw repository source code when authoring an index. It embeds a chunked metadata representation like this:
+
+```text
+ID: 1
+Name: calculator
+Description: This is a secure mathematical calculator designed to evaluate a text-based arithmetic expression.
+Git Link: https://github.com/example/calculator.git
+```
+
+That distinction matters. Search quality depends heavily on the quality of `tool_description`.
+
+## Legacy note
+
+Some source-project examples still use a `.toon` file and script names such as `embed_toon.py`. Treat that as an implementation detail of the current reference pipeline rather than the preferred long-term index format.

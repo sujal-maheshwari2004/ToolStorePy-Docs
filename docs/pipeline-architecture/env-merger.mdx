@@ -1,0 +1,24 @@
+---
+title: Env Merger
+description: ToolStorePy merges .env.example files and validates required keys before runtime.
+---
+
+# Env Merger
+
+Some tool repositories depend on secrets or API keys. ToolStorePy makes those requirements visible before runtime.
+
+## What it does
+
+1. scan cloned repo roots for `.env.example`
+2. merge them into `workspace/.env.example`
+3. preserve attribution comments by repo
+4. prompt for conflicting values when the same key appears in multiple repos
+5. validate `workspace/.env` if it already exists
+
+## Why it matters
+
+The generated MCP server may include tools from different repositories. Without a merge step, secret requirements would stay fragmented and easy to miss.
+
+## Output
+
+The builder also injects required env keys into a comment block at the top of the generated server so the runtime requirements stay visible.

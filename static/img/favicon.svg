@@ -1,0 +1,14 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="faviconTitle">
+  <title id="faviconTitle">ToolStorePy icon</title>
+  <defs>
+    <linearGradient id="favGrad" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14B8A6"/>
+      <stop offset="1" stop-color="#0F766E"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="18" fill="url(#favGrad)"/>
+  <path d="M17 19h30v6H35v19h-6V25H17z" fill="#F8FAFC"/>
+  <path d="M16 47h14c7 0 12 3 12 8s-5 8-12 8H16z" fill="#FBBF24"/>
+  <circle cx="47" cy="46" r="9" fill="#F8FAFC"/>
+  <path d="M46 40h2v12h-2zm-5 5h12v2H41z" fill="#0F766E"/>
+</svg>

@@ -1,0 +1,43 @@
+---
+title: MCP Builder
+description: The MCP builder combines parsed tools and utilities into one runnable server file.
+---
+
+# MCP Builder
+
+The MCP builder is the final synthesis step. It takes parsed imports, helpers, tool functions, and conflict metadata and writes a unified MCP server.
+
+## Output
+
+```text
+mcp_unified_server.py
+```
+
+## Responsibilities
+
+- write the MCP header and runtime footer
+- include safe imports
+- include utility functions, classes, and globals
+- include extracted `@tool` functions
+- emit comment blocks for env requirements, skipped repos, and build conflicts
+
+## Current generated runtime shape
+
+The builder creates a `FastMCP` server and ends with:
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport="streamable-http")
+```
+
+## Conflict handling
+
+The builder surfaces parser decisions such as:
+
+- duplicate tool renames
+- helper collisions
+- dropped relative imports
+- repos that contributed no tools
+- tools that may fail because required helper symbols were removed
+
+This makes the generated server auditable instead of silently rewriting code behind the scenes.
