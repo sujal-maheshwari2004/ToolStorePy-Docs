@@ -43,7 +43,8 @@ const config: Config = {
   themeConfig: {
     image: 'img/toolstorepy-social-card.svg',
     colorMode: {
-      defaultMode: 'light',
+      defaultMode: 'dark',
+      disableSwitch: true,
       respectPrefersColorScheme: false,
     },
     navbar: {
@@ -66,6 +67,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          to: '/docs/pipeline-architecture/overview',
+          label: 'Pipeline',
+          position: 'left',
+        },
+        {
           to: '/docs/cli-reference',
           label: 'CLI',
           position: 'left',
@@ -81,62 +87,43 @@ const config: Config = {
       style: 'dark',
       links: [
         {
-          title: 'Docs',
+          title: 'Get Started',
           items: [
-            {
-              label: 'Quickstart',
-              to: '/docs/quickstart',
-            },
-            {
-              label: 'Custom Tool Indexes',
-              to: '/docs/creating-custom-tool-indexes',
-            },
-            {
-              label: 'CLI Reference',
-              to: '/docs/cli-reference',
-            },
+            { label: 'Introduction', to: '/docs/intro' },
+            { label: 'Installation', to: '/docs/installation' },
+            { label: 'Quickstart', to: '/docs/quickstart' },
           ],
         },
         {
           title: 'Architecture',
           items: [
-            {
-              label: 'Pipeline Overview',
-              to: '/docs/pipeline-architecture/overview',
-            },
-            {
-              label: 'Security Model',
-              to: '/docs/security-model',
-            },
-            {
-              label: 'Evaluation Results',
-              to: '/docs/evaluation-results',
-            },
+            { label: 'Pipeline Overview', to: '/docs/pipeline-architecture/overview' },
+            { label: 'Security Model', to: '/docs/security-model' },
+            { label: 'Evaluation Results', to: '/docs/evaluation-results' },
+          ],
+        },
+        {
+          title: 'Index Authoring',
+          items: [
+            { label: 'Custom Tool Indexes', to: '/docs/creating-custom-tool-indexes' },
+            { label: 'Publishing an Index', to: '/docs/publishing-a-tool-index' },
+            { label: 'CLI Reference', to: '/docs/cli-reference' },
           ],
         },
         {
           title: 'Project',
           items: [
-            {
-              label: 'Overview',
-              to: '/docs/intro',
-            },
-            {
-              label: 'Extension Points',
-              to: '/docs/extending-toolstorepy',
-            },
-            {
-              label: 'GitHub',
-              href: 'https://github.com/sujal-maheshwari2004/ToolStore',
-            },
+            { label: 'GitHub', href: 'https://github.com/sujal-maheshwari2004/ToolStore' },
+            { label: 'Extending ToolStorePy', to: '/docs/extending-toolstorepy' },
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} ToolStorePy docs. Built with Docusaurus.`,
+      copyright: `© ${new Date().getFullYear()} ToolStorePy — MIT License`,
     },
     prism: {
-      theme: prismThemes.github,
-      darkTheme: prismThemes.dracula,
+      theme: prismThemes.vsDark,
+      darkTheme: prismThemes.vsDark,
+      additionalLanguages: ['python', 'bash', 'json'],
     },
   } satisfies Preset.ThemeConfig,
 };
