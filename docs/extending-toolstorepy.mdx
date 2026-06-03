@@ -15,10 +15,38 @@ ToolStorePy is deliberately modular. Most extension work maps cleanly onto one f
 | Change embedding or reranking models | `orchestrator.py` constructor |
 | Change index download logic | `index/downloader.py` |
 | Adjust repo caching behavior | `loader/cache.py` |
-| Add or tighten security rules | `utils/security_scanner.py` |
+| Add or tighten AST security rules | `utils/security_scanner.py` |
+| Tune the LLM scan system prompt | `utils/llm_scanner.py` |
+| Change LLM scan token budget | `utils/llm_scanner.py` (`MAX_REPO_CHARS`, `MAX_FILE_CHARS`) |
 | Change env merge behavior | `utils/env_merger.py` |
 | Change decorator detection | `builder/parser.py` |
 | Change generated server structure | `builder/mcp_builder.py` |
+| Change default host/port | `orchestrator.py` constructor defaults |
+
+## LLM scanner extension
+
+`utils/llm_scanner.py` uses LangChain's `init_chat_model` and `with_structured_output`. To change the verdict schema, update the `LLMVerdict` and `LLMFinding` Pydantic models. To tune what the model looks for, edit `_SYSTEM_PROMPT`.
+
+The scanner is provider-agnostic. Any LangChain-supported model string works.
+
+## Adding a built-in index
+
+In `index/registry.py`, add an entry to `BUILTIN_INDEXES`:
+
+```python
+BUILTIN_INDEXES = {
+    "core-tools": {
+        "url": "https://...",
+        "sha256": "abc123...",  # fill in after publishing
+    },
+    "my-index": {
+        "url": "https://example.com/my-index.zip",
+        "sha256": None,
+    },
+}
+```
+
+The `sha256` field enables integrity verification in the downloader. Set it once you have a stable release.
 
 ## Good extension patterns
 
