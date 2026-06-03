@@ -11,7 +11,7 @@ const FEATURES = [
   {
     tag: 'Build',
     title: 'One server from many repos',
-    body: 'Resolves an index, runs semantic retrieval + reranking, clones winning repos, and synthesizes a single mcp_unified_server.py. No manual wiring.',
+    body: 'Resolves an index, runs semantic retrieval + reranking, clones winning repos, and synthesizes a single mcp_unified_server.py. Configure host and port at build time.',
     icon: '⬡',
   },
   {
@@ -22,8 +22,8 @@ const FEATURES = [
   },
   {
     tag: 'Security',
-    title: 'Supply-chain visibility',
-    body: 'Static AST scanning flags shell exec, network access, deserialization, and env leaks before build approval. Audit before runtime.',
+    title: 'AST + LLM supply-chain review',
+    body: 'Static AST scanning flags shell exec, deserialization, and env leaks. Opt-in LLM scan reviews full source autonomously — no human prompt needed.',
     icon: '◉',
   },
 ];
@@ -32,13 +32,14 @@ const PIPELINE = [
   { step: '01', label: 'queries.json', desc: 'Natural-language tool descriptions' },
   { step: '02', label: 'Semantic retrieval', desc: 'SentenceTransformer + ChromaDB top-k' },
   { step: '03', label: 'Cross-encoder rerank', desc: 'Precision pass over candidate set' },
-  { step: '04', label: 'Clone + scan', desc: 'AST security scan, env merge, approval' },
-  { step: '05', label: 'MCP synthesis', desc: 'Single auditable server file' },
+  { step: '04', label: 'Clone + AST scan', desc: 'Static security analysis, env merge' },
+  { step: '05', label: 'LLM scan (optional)', desc: '--llm-scan: autonomous include/skip, any provider' },
+  { step: '06', label: 'MCP synthesis', desc: 'Single auditable server file, custom host:port' },
 ];
 
 const SEVERITY = [
-  { name: 'HIGH', desc: 'Shell exec, dynamic eval, outbound network, unsafe deserialization', color: '#f43f5e' },
-  { name: 'MEDIUM', desc: 'Filesystem access, env variable access, reflection', color: '#f59e0b' },
+  { name: 'HIGH', desc: 'Shell exec, dynamic eval, unsafe deserialization — requires approval or LLM skip', color: '#f43f5e' },
+  { name: 'MEDIUM', desc: 'Capability imports, env access, dynamic reflection', color: '#f59e0b' },
   { name: 'LOW', desc: 'Crypto primitives, deprecated modules, potential secret logging', color: '#22d3ee' },
 ];
 
@@ -65,9 +66,9 @@ function HeroSection() {
             <p className={styles.heroBody}>
               ToolStorePy takes a <code>queries.json</code> of natural-language tool
               requests, semantically retrieves matched repositories from a curated index,
-              runs security scanning, merges secret templates, and synthesizes one
-              runnable <code>mcp_unified_server.py</code> — with full build-time
-              auditability.
+              runs AST and optional LLM security scanning, merges secret templates, and
+              synthesizes one runnable <code>mcp_unified_server.py</code> — on any
+              host and port, with full build-time auditability.
             </p>
 
             <div className={styles.heroActions}>
@@ -94,25 +95,24 @@ function HeroSection() {
             <pre className={styles.panelCode}>{`# 1. describe what you need
 $ cat queries.json
 [
-  {
-    "tool_description":
-      "evaluate arithmetic expressions"
-  },
-  {
-    "tool_description":
-      "convert units of measurement"
-  }
+  { "tool_description":
+      "evaluate arithmetic expressions" },
+  { "tool_description":
+      "convert units of measurement" }
 ]
 
-# 2. build
+# 2. build (LLM scan, custom port)
 $ toolstorepy build \\
     --queries queries.json \\
-    --index core-tools
+    --index core-tools \\
+    --llm-scan \\
+    --port 9090
 
 [✓] retrieved: calculator (0.94)
 [✓] retrieved: unit-converter (0.91)
-[!] scanning repos...
-[✓] build complete
+[✓] AST scan complete
+[✓] LLM scan: INCLUDE (confidence=HIGH)
+[✓] build complete → port 9090
 
 # 3. run
 $ python mcp_unified_server.py`}</pre>
@@ -182,8 +182,9 @@ function SecuritySection() {
             </Heading>
             <p className={styles.securityBody}>
               Every cloned repository passes through a static AST scanner before
-              contributing to the final MCP server. Findings are tiered by severity
-              and HIGH findings require explicit approval — no silent inclusion.
+              contributing to the final MCP server. Pass <code>--llm-scan</code> to
+              add a full-source LLM review that makes autonomous include/skip decisions
+              — no human prompt, any model provider via LangChain.
             </p>
             <Link className="button button--primary" to="/docs/security-model">
               Read the security model
@@ -230,7 +231,7 @@ function CtaSection() {
             </a>
           </div>
           <div className={styles.ctaCode}>
-            toolstorepy build --queries queries.json --index core-tools
+            toolstorepy build --queries queries.json --index core-tools --llm-scan --port 9090
           </div>
         </div>
       </div>
@@ -243,7 +244,7 @@ export default function Home(): ReactNode {
   return (
     <Layout
       title="ToolStorePy — Semantic MCP Server Builder"
-      description="ToolStorePy turns plain-English tool requests into a unified MCP server. Semantic retrieval, security scanning, and custom index authoring.">
+      description="ToolStorePy turns plain-English tool requests into a unified MCP server. Semantic retrieval, AST + LLM security scanning, custom host/port, and custom index authoring.">
       <HeroSection />
       <PipelineSection />
       <FeaturesSection />
