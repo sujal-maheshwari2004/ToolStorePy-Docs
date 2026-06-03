@@ -13,22 +13,74 @@ toolstorepy build --queries <path> [--index <name> | --index-url <url>] [options
 
 ### Flags
 
-| Flag | Description |
-| --- | --- |
-| `--queries` | Path to `queries.json` with `tool_description` entries |
-| `--index` | Name of a built-in index such as `core-tools` |
-| `--index-url` | URL to a downloadable index archive |
-| `--workspace` | Output workspace directory |
-| `--install-requirements` | Install cloned repo requirements into the workspace venv |
-| `--force-refresh` | Re-download the index archive even if cached |
-| `--verbose` | Enable verbose logging |
+| Flag | Default | Description |
+| --- | --- | --- |
+| `--queries` | required | Path to `queries.json` with `tool_description` entries |
+| `--index` | — | Name of a built-in index such as `core-tools` |
+| `--index-url` | — | URL to a downloadable index archive |
+| `--workspace` | `toolstorepy_workspace` | Output workspace directory |
+| `--install-requirements` | off | Install cloned repo requirements into the workspace venv |
+| `--host` | `0.0.0.0` | Host the generated MCP server binds on |
+| `--port` | `8000` | Port the generated MCP server listens on |
+| `--llm-scan` | off | Enable LLM-based autonomous security review (bypasses human prompt) |
+| `--llm-model` | `claude-sonnet-4-6` | Model for LLM scanning — any LangChain-supported string |
+| `--force-refresh` | off | Re-download the index archive even if cached |
+| `--verbose` | off | Enable verbose logging and full tracebacks on failure |
+
+### Examples
+
+```bash
+# Basic build
+toolstorepy build --queries queries.json --index core-tools
+
+# Custom port
+toolstorepy build --queries queries.json --index core-tools --port 9090
+
+# Custom host and port
+toolstorepy build --queries queries.json --index core-tools --host 127.0.0.1 --port 8080
+
+# LLM-based autonomous security scan with default model (Claude)
+export ANTHROPIC_API_KEY=sk-...
+toolstorepy build --queries queries.json --index core-tools --llm-scan
+
+# LLM scan with GPT-4o
+export OPENAI_API_KEY=sk-...
+toolstorepy build --queries queries.json --index core-tools --llm-scan --llm-model gpt-4o
+
+# LLM scan with Gemini
+export GOOGLE_API_KEY=...
+toolstorepy build --queries queries.json --index core-tools --llm-scan --llm-model gemini-2.0-flash
+
+# Full build with all options
+toolstorepy build \
+  --queries queries.json \
+  --index core-tools \
+  --workspace ./my_workspace \
+  --install-requirements \
+  --host 0.0.0.0 \
+  --port 9090 \
+  --llm-scan \
+  --verbose
+```
+
+---
 
 ## `toolstorepy cache`
 
 ### Populate
 
+Pre-warm the bare-repo cache from a resolved queries file (items must have a `git_link` field) or from explicit URLs.
+
 ```bash
-toolstorepy cache populate --queries <path> [--force]
+# From a resolved queries file
+toolstorepy cache populate --queries resolved.json
+
+# From explicit URLs (can be repeated)
+toolstorepy cache populate --url https://github.com/org/repo1.git \
+                           --url https://github.com/org/repo2.git
+
+# Force re-cache even if already cached
+toolstorepy cache populate --url https://github.com/org/repo.git --force
 ```
 
 ### List
@@ -43,13 +95,43 @@ toolstorepy cache list
 toolstorepy cache clear
 ```
 
-## Cache command caveat
+### Cache command caveat
 
-In the current implementation, `cache populate` expects query items that already include `git_link` fields. That differs from the normal build input format, which uses `tool_description`. In practice this makes `cache populate` most useful for evaluation datasets or pre-resolved manifests.
+`cache populate --queries` expects items that already include `git_link` fields, not `tool_description`. That differs from the normal build input format. Use `--url` for direct URLs, or run a full `toolstorepy build` first to resolve descriptions to URLs and warm the cache automatically.
+
+---
+
+## Server configuration
+
+`--host` and `--port` are baked into the generated `mcp_unified_server.py` at build time. The output file will contain:
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport='streamable-http', host='0.0.0.0', port=8000)
+```
+
+The transport is always `streamable-http`. Only host and port are configurable.
+
+---
+
+## LLM scan model strings
+
+`--llm-model` accepts any [LangChain-supported model string](https://python.langchain.com/docs/how_to/chat_models_universal_init/). The provider is inferred automatically from well-known prefixes.
+
+| Provider | Example model string | Required env var | Install |
+| --- | --- | --- | --- |
+| Anthropic | `claude-sonnet-4-6` | `ANTHROPIC_API_KEY` | `pip install langchain-anthropic` |
+| OpenAI | `gpt-4o` | `OPENAI_API_KEY` | `pip install langchain-openai` |
+| Google | `gemini-2.0-flash` | `GOOGLE_API_KEY` | `pip install langchain-google-genai` |
+| Mistral | `mistral-large-latest` | `MISTRAL_API_KEY` | `pip install langchain-mistralai` |
+
+You can also use explicit provider prefix syntax: `anthropic:claude-sonnet-4-6`, `openai:gpt-4o`.
+
+---
 
 ## Index authoring scripts
 
-These are part of the current reference index-authoring workflow. The docs recommend JSON as the preferred source format even though the script names still reference `toon`.
+These are part of the current reference index-authoring workflow.
 
 ### Create tool metadata interactively
 
@@ -63,8 +145,17 @@ python vector_db_creation/toon_file_creation.py
 python vector_db_creation/embed_toon.py
 ```
 
-## Typical build command
+---
+
+## Typical build commands
 
 ```bash
-toolstorepy build --queries queries.json --index core-tools --install-requirements
+# Minimal
+toolstorepy build --queries queries.json --index core-tools
+
+# With requirements installed and custom port
+toolstorepy build --queries queries.json --index core-tools --install-requirements --port 9090
+
+# Fully automated with LLM security scan (no human prompts)
+toolstorepy build --queries queries.json --index core-tools --llm-scan
 ```
