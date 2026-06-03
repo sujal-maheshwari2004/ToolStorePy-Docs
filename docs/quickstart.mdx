@@ -32,48 +32,83 @@ Using a direct downloadable index:
 toolstorepy build --queries queries.json --index-url https://example.com/core-tools-v1.zip
 ```
 
-## 3. Review build-time prompts
+## 3. Configure host and port
 
-During the build ToolStorePy may:
+By default the generated server binds to `0.0.0.0:8000`. Override with `--host` and `--port`:
 
-- print a security report for cloned repositories
-- ask whether to include repos with `HIGH` findings
-- merge `.env.example` files into `workspace/.env.example`
-- warn about missing keys in `workspace/.env`
+```bash
+toolstorepy build --queries queries.json --index core-tools --port 9090
+toolstorepy build --queries queries.json --index core-tools --host 127.0.0.1 --port 8080
+```
 
-## 4. Run the generated server
+The values are baked into the generated `mcp_unified_server.py` at build time.
+
+## 4. Choose a security scan mode
+
+### Default — AST scan with human approval
+
+The AST scanner runs on every build. If a repo has `HIGH` findings, ToolStorePy pauses and asks you to include or skip it before proceeding.
+
+### Automated — LLM scan (no human prompt)
+
+Pass `--llm-scan` to have an LLM review each repo and make the include/skip decision automatically. No human prompt fires. Set the API key for your chosen provider:
+
+```bash
+# Claude (default model)
+export ANTHROPIC_API_KEY=sk-...
+toolstorepy build --queries queries.json --index core-tools --llm-scan
+
+# GPT-4o
+export OPENAI_API_KEY=sk-...
+toolstorepy build --queries queries.json --index core-tools --llm-scan --llm-model gpt-4o
+```
+
+Install the matching integration package first:
+
+```bash
+pip install langchain-anthropic    # for Claude
+pip install langchain-openai       # for GPT
+pip install langchain-google-genai # for Gemini
+```
+
+## 5. Review the build output
 
 The build writes:
 
 ```text
 toolstorepy_workspace/
-|-- mcp_unified_server.py
-|-- security_report.txt
-|-- .env.example
-`-- .venv/
+├── mcp_unified_server.py
+├── security_report.txt
+├── .env.example
+└── .venv/
 ```
 
-Then run:
+`security_report.txt` contains findings from all scanners that ran. LLM findings are tagged `[LLM]`.
+
+## 6. Run the generated server
 
 ```bash
 cd toolstorepy_workspace
 python mcp_unified_server.py
 ```
 
-## 5. Use it from Python code
-
-If you want to call the build pipeline from your own application instead of the CLI:
+## 7. Use it from Python code
 
 ```python
 from toolstorepy.orchestrator import ToolStorePy
 
-toolstore = ToolStorePy(workspace="toolstorepy_workspace")
+toolstore = ToolStorePy(
+    workspace="toolstorepy_workspace",
+    port=9090,
+    llm_scan=True,
+    llm_model="claude-sonnet-4-6",
+)
 toolstore.build(
     queries="queries.json",
     index="core-tools",
 )
 ```
 
-## 6. Bring your own index later
+## 8. Bring your own index
 
-The quickstart uses a prebuilt index, but ToolStorePy is not limited to that model. You can author your own semantic tool index from JSON metadata and publish it for later builds. See [Creating Custom Tool Indexes](./creating-custom-tool-indexes).
+The quickstart uses a prebuilt index, but ToolStorePy is not limited to that. You can author your own semantic tool index from JSON metadata and publish it for later builds. See [Creating Custom Tool Indexes](./creating-custom-tool-indexes).
