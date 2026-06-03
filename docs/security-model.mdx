@@ -13,22 +13,40 @@ Indexes do not execute code directly, but they **do** point ToolStorePy toward e
 
 ## Repository trust boundary
 
-Matched repositories are cloned before build. They are then scanned with a static AST-based security scanner that reports:
+Matched repositories are cloned before build. They are then scanned with a security scanner before being approved for inclusion.
 
-- shell execution
-- dynamic code execution
-- network access
-- unsafe deserialization
-- file-system access
-- environment-variable access
+## Scan modes
+
+Two scanners are available. They can be used independently or together.
+
+### AST scanner (default)
+
+A static AST-based scanner that flags:
+
+| Severity | Examples |
+| --- | --- |
+| HIGH | shell execution (`os.system`, `subprocess shell=True`), dynamic code execution (`eval`/`exec`), unsafe deserialization (`pickle.loads`, `yaml.load`), unconditional shell wrappers (`subprocess.getoutput`) |
+| MEDIUM | capability imports (subprocess, pickle, raw sockets, unsafe XML), dynamic reflection, potential secret logging |
+| LOW | HTTP clients, crypto primitives, deprecated modules |
+
+If a repository has `HIGH` findings, ToolStorePy asks you whether to include or skip it. Skipping keeps it out of the final server.
+
+### LLM scanner (`--llm-scan`)
+
+An LLM reads the full source of each repo and makes an autonomous `INCLUDE` / `SKIP` decision. The human prompt is bypassed entirely. The LLM can reason about patterns the AST scanner cannot — such as obfuscated logic, suspicious data flows, or unusual combinations of capabilities.
+
+The LLM scanner is model-agnostic via LangChain. Any supported provider works: Claude, GPT, Gemini, Mistral, and others.
+
+When both scanners are active, findings from both are merged into the same report and the LLM decision is final.
 
 ## User approval boundary
 
-If a repository has `HIGH` findings, ToolStorePy asks you whether to include it. Skipping the repo keeps it out of the final generated MCP server.
+- **AST only:** human approves or skips each repo with HIGH findings before the build continues
+- **LLM scan:** no human prompt — the LLM verdict is final and the build proceeds automatically
 
 ## Secret boundary
 
-If tool repos ship `.env.example` files, ToolStorePy merges them into one workspace template and checks your `.env` for missing keys. This makes runtime secret requirements visible before launch.
+If tool repos ship `.env.example` files, ToolStorePy merges them into one workspace template and checks your `.env` for missing keys. Repos excluded by the security scan do not contribute their secrets to the merged file.
 
 ## Runtime boundary
 
@@ -37,7 +55,8 @@ The generated MCP server is regular Python code assembled from other repositorie
 ## Practical guidance
 
 - treat indexes as supply-chain inputs
-- review `security_report.txt`
+- review `workspace/security_report.txt` after every build
 - prefer curated indexes and known repo sources
-- inspect generated server code before production use
+- inspect the generated server before production use
+- use `--llm-scan` for automated pipelines where a human prompt is not possible
 - avoid running high-risk tools blindly on sensitive machines
