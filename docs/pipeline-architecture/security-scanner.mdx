@@ -1,27 +1,131 @@
 ---
 title: Security Scanner
-description: Static AST scanning identifies shell, network, deserialization, file-system, and secret-related risks before build approval.
+description: AST-based and LLM-based security scanning identify risks before repos are baked into the generated MCP server.
 ---
 
 # Security Scanner
 
-Every cloned repository is scanned before the generated MCP server is built.
+Every cloned repository is scanned before the generated MCP server is built. Two scan modes are available: the default AST scanner and the optional LLM scanner. They can be used independently or together.
 
-## Severity levels
+---
 
-| Severity | Examples |
+## AST scanner (default)
+
+Static analysis using Python's `ast` module. Fast, deterministic, and runs on every build.
+
+### Severity levels
+
+| Severity | What triggers it |
 | --- | --- |
-| `HIGH` | shell execution, dynamic code execution, outbound network access, unsafe deserialization |
-| `MEDIUM` | file-system access, environment variable access, reflection, insecure XML parsing |
-| `LOW` | direct crypto primitives, deprecated modules, potential secret logging |
+| `HIGH` | `eval`/`exec`/`compile`, `os.system`, `subprocess` with `shell=True`, `subprocess.getoutput`, `pickle.loads`, `yaml.load` without `Loader=` |
+| `MEDIUM` | Capability imports (`subprocess`, `pickle`, raw sockets, unsafe XML parsers), dynamic reflection (`getattr`/`setattr` with non-literal names), potential secret logging |
+| `LOW` | HTTP clients (`requests`, `urllib`, `httpx`), crypto primitives (`hashlib`, `ssl`), deprecated modules |
 
-## Current behavior
+### Behavior
 
-- generate a terminal report
-- write `workspace/security_report.txt`
-- prompt the user repo-by-repo for any repository with `HIGH` findings
-- exclude skipped repos from the final generated server
+- generates a terminal report
+- writes `workspace/security_report.txt`
+- for repos with `HIGH` findings: prompts the user to include or skip before the build proceeds
+- excluded repos do not appear in the generated server
+
+---
+
+## LLM scanner (`--llm-scan`)
+
+An LLM reads the full source of each repo and makes an autonomous `INCLUDE` / `SKIP` decision. The human approval prompt is bypassed entirely — the build proceeds automatically based on the LLM verdict.
+
+### How it works
+
+1. Python source files are collected per repo (up to ~80k chars total, 12k per file)
+2. The source is sent to the configured model with a security-focused system prompt
+3. The model returns a structured verdict: `INCLUDE` or `SKIP`, with confidence level and per-finding details
+4. Repos the model marks `SKIP` are excluded from the build automatically
+5. All findings are merged into the same `security_report.txt`
+
+LLM findings are tagged `[LLM]` in the report so they are visually distinct from AST findings.
+
+### Model-agnostic via LangChain
+
+The LLM scanner uses [LangChain's `init_chat_model`](https://python.langchain.com/docs/how_to/chat_models_universal_init/) and `with_structured_output`, so any supported provider works. The provider is inferred automatically from the model string.
+
+```bash
+# Claude (default)
+export ANTHROPIC_API_KEY=sk-...
+toolstorepy build --queries q.json --index core-tools --llm-scan
+
+# GPT-4o
+export OPENAI_API_KEY=sk-...
+toolstorepy build --queries q.json --index core-tools --llm-scan --llm-model gpt-4o
+
+# Gemini
+export GOOGLE_API_KEY=...
+toolstorepy build --queries q.json --index core-tools --llm-scan --llm-model gemini-2.0-flash
+```
+
+Install the integration package for your provider:
+
+```bash
+pip install langchain-anthropic    # Claude  → ANTHROPIC_API_KEY
+pip install langchain-openai       # GPT     → OPENAI_API_KEY
+pip install langchain-google-genai # Gemini  → GOOGLE_API_KEY
+```
+
+### Verdict schema
+
+The model returns a structured response validated by a Pydantic schema:
+
+```python
+{
+  "verdict": "INCLUDE" | "SKIP",
+  "confidence": "HIGH" | "MEDIUM" | "LOW",
+  "summary": "one sentence",
+  "findings": [
+    {
+      "severity": "HIGH" | "MEDIUM" | "LOW",
+      "file": "relative/path.py",
+      "line": 42,
+      "category": "Shell injection",
+      "detail": "what the risk is and why it matters"
+    }
+  ]
+}
+```
+
+### Fail-open behavior
+
+If the LLM API call fails (missing key, network error, rate limit), the scanner logs the error as a `MEDIUM` finding and defaults to `INCLUDE` for that repo. A broken API key does not silently kill the entire build.
+
+---
+
+## Using both scanners together
+
+When `--llm-scan` is active, the AST scan still runs. Both sets of findings are merged into the same `RepoReport` and written to `security_report.txt`. The LLM decision is final — no human prompt fires.
+
+```
+AST scan (always)
+      +
+LLM scan (--llm-scan)
+      |
+      v
+merged security_report.txt
+      |
+      v
+LLM verdict → INCLUDE or SKIP (no human prompt)
+```
+
+---
+
+## Security report
+
+`workspace/security_report.txt` is always written regardless of scan mode. It contains:
+
+- per-repo status (`CLEAN`, `HIGH risk`, `MEDIUM risk`, `LOW risk`)
+- all individual findings with file path, line number, category, and detail
+- `[LLM]`-tagged findings when LLM scan was used
+- a summary table at the end
+
+---
 
 ## Important limitation
 
-The scanner is static and AST-based. It improves reviewability, but it is not a sandbox and it does not prove that a repository is safe.
+Both scanners are static. They improve reviewability and catch common risky patterns, but they are not sandboxes and they cannot prove that a repository is safe. Review `security_report.txt` and inspect the generated server before production use.
