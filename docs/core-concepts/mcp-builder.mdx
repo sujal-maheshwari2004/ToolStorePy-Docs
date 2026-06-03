@@ -21,13 +21,26 @@ mcp_unified_server.py
 - include extracted `@tool` functions
 - emit comment blocks for env requirements, skipped repos, and build conflicts
 
-## Current generated runtime shape
+## Generated runtime shape
 
-The builder creates a `FastMCP` server and ends with:
+The builder creates a `FastMCP` server using `streamable-http` transport. The `--host` and `--port` values passed at build time are baked into the output file:
 
 ```python
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http")
+    mcp.run(transport='streamable-http', host='0.0.0.0', port=8000)
+```
+
+To use a different port, pass `--port` at build time:
+
+```bash
+toolstorepy build --queries queries.json --index core-tools --port 9090
+```
+
+This generates:
+
+```python
+if __name__ == "__main__":
+    mcp.run(transport='streamable-http', host='0.0.0.0', port=9090)
 ```
 
 ## Conflict handling
