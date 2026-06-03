@@ -31,7 +31,13 @@ cross-encoder reranking
 repo cloning
   |
   v
-security scan + env merge
+AST security scan
+  |
+  v
+LLM security scan (optional, --llm-scan)
+  |
+  v
+.env merge + validation
   |
   v
 AST parsing
@@ -52,7 +58,21 @@ MCP synthesis
 - resolve an index by name or URL
 - retrieve best-matching tools for each query
 - clone and inspect repos
+- scan with AST scanner (always)
+- scan with LLM scanner if `--llm-scan` is passed (autonomous, no human prompt)
 - build one MCP server from approved tool code
+
+## Security scan modes
+
+| Mode | How it works | Human prompt |
+| --- | --- | --- |
+| AST only (default) | Static analysis, flags HIGH/MEDIUM/LOW | Yes — user approves or skips HIGH repos |
+| LLM scan (`--llm-scan`) | LLM reads full source, returns INCLUDE/SKIP | No — LLM decision is final |
+| Both | AST runs, LLM reviews all repos, findings merged | No — LLM decision is final |
+
+## Server configuration
+
+The generated server runs on `streamable-http` transport. Host and port are baked in at build time via `--host` and `--port` (defaults: `0.0.0.0:8000`).
 
 ## Design principle
 
