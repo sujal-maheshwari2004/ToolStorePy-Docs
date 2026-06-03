@@ -8,9 +8,9 @@ description: Install ToolStorePy and prepare the environment for builds and MCP 
 
 ## Requirements
 
-- Python `>= 3.12` for the packaged ToolStorePy CLI.
-- Git available on `PATH`.
-- Internet access for index downloads and repository cloning.
+- Python `>= 3.13`
+- Git available on `PATH`
+- Internet access for index downloads and repository cloning
 
 ## Install the package
 
@@ -24,6 +24,19 @@ If you are working on the repository itself, use editable install instead:
 pip install -e .
 ```
 
+## LLM scan dependencies (optional)
+
+`--llm-scan` requires `langchain` and `langchain-core` (included in the base install) plus the integration package for your chosen model provider. Install the one you need:
+
+```bash
+pip install langchain-anthropic    # Claude  → ANTHROPIC_API_KEY
+pip install langchain-openai       # GPT     → OPENAI_API_KEY
+pip install langchain-google-genai # Gemini  → GOOGLE_API_KEY
+pip install langchain-mistralai    # Mistral → MISTRAL_API_KEY
+```
+
+You do not need to install all of them — only the one matching your `--llm-model`.
+
 ## What happens during the first build
 
 ToolStorePy does **not** expect you to install `mcp` globally. During the first build it creates a workspace virtual environment at:
@@ -32,11 +45,9 @@ ToolStorePy does **not** expect you to install `mcp` globally. During the first 
 toolstorepy_workspace/.venv
 ```
 
-It then installs the MCP runtime there so the generated server can be run in isolation from your system Python environment.
+It installs the MCP runtime there so the generated server runs in isolation from your system Python environment.
 
 ## Sanity check
-
-Once installed, the main CLI entrypoint is:
 
 ```bash
 toolstorepy --help
@@ -44,14 +55,16 @@ toolstorepy --help
 
 ## Use it as a library
 
-ToolStorePy can also be instantiated from Python code:
-
 ```python
 from toolstorepy.orchestrator import ToolStorePy
 
 toolstore = ToolStorePy(
     workspace="toolstorepy_workspace",
     install_requirements=True,
+    host="0.0.0.0",
+    port=9090,
+    llm_scan=True,
+    llm_model="claude-sonnet-4-6",
     verbose=True,
 )
 
@@ -62,8 +75,6 @@ output_path = toolstore.build(
 
 print(output_path)
 ```
-
-This is the right path if you want to integrate ToolStorePy into your own scripts, notebooks, or internal automation.
 
 ## About index authoring tools
 
